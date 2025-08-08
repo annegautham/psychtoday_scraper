@@ -196,12 +196,16 @@ def dashboard():
     
     conn.close()
     
+    # Get current time for the dashboard
+    current_time = datetime.now().strftime('%B %d, %Y at %I:%M %p')
+    
     return render_template('dashboard.html', 
                          total_therapists=total_therapists,
                          therapists_with_emails=therapists_with_emails,
                          pending_emails=pending_emails,
                          sent_emails=sent_emails,
-                         recent_jobs=recent_jobs)
+                         recent_jobs=recent_jobs,
+                         current_time=current_time)
 
 @app.route('/extract', methods=['GET', 'POST'])
 def extract_data():
