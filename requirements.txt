@@ -18,17 +18,11 @@ webdriver-manager>=3.8.0
 # Production server (optional)
 gunicorn>=20.1.0
 
-# Email validation
-email-validator>=1.3.0
-
 # HTTP session management
 requests-html>=0.10.0
 
 # Rate limiting and delays
 ratelimit>=2.2.0
-
-# Email validation
-email-validator>=1.3.0
 
 # HTML parsing alternatives
 html5lib>=1.1
@@ -65,14 +59,14 @@ chardet>=5.0.0
 # typing - built into Python
 
 # Optional: For more advanced email features
-email-mime-multipart>=0.1.0
+# email.mime.multipart - built into Python (part of email package)
 
 # Optional: For proxy support if needed
 requests[socks]>=2.28.0
 
 # Optional: For async scraping (if implementing async version)
 aiohttp>=3.8.0
-asyncio>=3.4.3
+# asyncio - built into Python (3.7+)
 
 # Optional: For Hunter.io API integration
 hunter>=2.2.0
