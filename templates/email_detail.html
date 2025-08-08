@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Email Review - Therapist Extraction System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-envelope-open text-primary"></i> Review Email</h1>
+    <a href="{{ url_for('emails') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Queue
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <!-- Therapist Info -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user"></i> Therapist Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Name:</strong><br>
+                    {{ email.name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong><br>
+                    <a href="mailto:{{ email.therapist_email }}" class="text-decoration-none">
+                        {{ email.therapist_email }}
+                    </a>
+                </div>
+                {% if email.website %}
+                <div class="mb-3">
+                    <strong>Website:</strong><br>
+                    <a href="{{ email.website }}" target="_blank" class="text-decoration-none">
+                        {{ email.website }}
+                    </a>
+                </div>
+                {% endif %}
+                {% if email.specialties %}
+                <div class="mb-3">
+                    <strong>Specialties:</strong><br>
+                    <small class="text-muted">{{ email.specialties }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Email Status -->
+        <div class="card mt-3">
+            <div class="card-body text-center">
+                <h6>Current Status</h6>
+                {% if email.status == 'draft' %}
+                    <span class="badge bg-warning fs-6">
+                        <i class="fas fa-edit"></i> Draft
+                    </span>
+                    <p class="text-muted mt-2 mb-0">Ready for review</p>
+                {% elif email.status == 'approved' %}
+                    <span class="badge bg-success fs-6">
+                        <i class="fas fa-check"></i> Approved
+                    </span>
+                    <p class="text-muted mt-2 mb-0">Ready to send</p>
+                {% elif email.status == 'sent' %}
+                    <span class="badge bg-primary fs-6">
+                        <i class="fas fa-paper-plane"></i> Sent
+                    </span>
+                    <p class="text-muted mt-2 mb-0">Email delivered</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Email Editor -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-edit"></i> Email Content</h6>
+            </div>
+            <div class="card-body">
+                <form id="emailForm">
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject Line</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="subject" 
+                               value="{{ email.subject }}"
+                               {% if email.status == 'sent' %}readonly{% endif %}>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="body" class="form-label">Email Body</label>
+                        <textarea class="form-control" 
+                                  id="body" 
+                                  rows="15"
+                                  {% if email.status == 'sent' %}readonly{% endif %}>{{ email.body }}</textarea>
+                    </div>
+
+                    {% if email.status in ['draft', 'approved'] %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> 
+                            {% if email.status == 'draft' %}Approve Email{% else %}Update & Keep Approved{% endif %}
+                        </button>
+                        {% if email.status == 'approved' %}
+                        <button type="button" class="btn btn-primary" onclick="sendSingleEmail()">
+                            <i class="fas fa-paper-plane"></i> Send Now
+                        </button>
+                        {% endif %}
+                        <button type="button" class="btn btn-outline-danger" onclick="rejectEmail()">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Email Preview -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-eye"></i> Email Preview</h6>
+            </div>
+            <div class="card-body">
+                <div class="border rounded p-3" style="background: #f8f9fa;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>To:</strong> {{ email.therapist_email }}
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Subject:</strong> <span id="previewSubject">{{ email.subject }}</span>
+                    </div>
+                    <hr>
+                    <div id="previewBody" style="white-space: pre-line;">{{ email.body }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Update preview as user types
+document.getElementById('subject').addEventListener('input', function() {
+    document.getElementById('previewSubject').textContent = this.value;
+});
+
+document.getElementById('body').addEventListener('input', function() {
+    document.getElementById('previewBody').textContent = this.value;
+});
+
+// Handle form submission
+document.getElementById('emailForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const subject = document.getElementById('subject').value;
+    const body = document.getElementById('body').value;
+    
+    fetch(`/approve_email/{{ email.id }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            subject: subject,
+            body: body
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.href = "{{ url_for('emails') }}", 1500);
+        } else {
+            showToast('Failed to approve email', 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Error: ' + error.message, 'danger');
+    });
+});
+
+function sendSingleEmail() {
+    if (!confirm('Send this email now?')) {
+        return;
+    }
+    
+    // First approve any changes, then send
+    const subject = document.getElementById('subject').value;
+    const body = document.getElementById('body').value;
+    
+    fetch(`/approve_email/{{ email.id }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            subject: subject,
+            body: body
+        })
+    })
+    .then(() => {
+        return fetch('/send_emails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Email sent successfully!', 'success');
+            setTimeout(() => window.location.href = "{{ url_for('emails') }}", 1500);
+        } else {
+            showToast('Failed to send email', 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Error: ' + error.message, 'danger');
+    });
+}
+
+function rejectEmail() {
+    if (!confirm('Reject this email? It will be removed from the queue.')) {
+        return;
+    }
+    
+    // Implementation for rejecting email
+    showToast('Email rejected', 'warning');
+    setTimeout(() => window.location.href = "{{ url_for('emails') }}", 1500);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Therapist Extraction System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tachometer-alt text-primary"></i> Dashboard</h1>
+    <div class="text-muted">
+        <i class="fas fa-clock"></i> Last updated: {{ moment().format('LLL') }}
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h2>{{ total_therapists }}</h2>
+                <p class="mb-0">Total Therapists</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card-2">
+            <div class="card-body text-center">
+                <i class="fas fa-envelope fa-3x mb-3"></i>
+                <h2>{{ therapists_with_emails }}</h2>
+                <p class="mb-0">With Email Addresses</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card-3">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-3x mb-3"></i>
+                <h2>{{ pending_emails }}</h2>
+                <p class="mb-0">Pending Emails</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card-4">
+            <div class="card-body text-center">
+                <i class="fas fa-paper-plane fa-3x mb-3"></i>
+                <h2>{{ sent_emails }}</h2>
+                <p class="mb-0">Emails Sent</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-download fa-2x text-primary mb-3"></i>
+                <h5>Extract New Data</h5>
+                <p class="text-muted">Start a new extraction job for any US state</p>
+                <a href="{{ url_for('extract_data') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Extraction
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-edit fa-2x text-success mb-3"></i>
+                <h5>Review Emails</h5>
+                <p class="text-muted">Review and approve draft emails before sending</p>
+                <a href="{{ url_for('emails') }}" class="btn btn-success">
+                    <i class="fas fa-eye"></i> Review Queue
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x text-info mb-3"></i>
+                <h5>Browse Therapists</h5>
+                <p class="text-muted">View all extracted therapist data</p>
+                <a href="{{ url_for('therapists') }}" class="btn btn-info">
+                    <i class="fas fa-list"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Extraction Jobs -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-history"></i> Recent Extraction Jobs</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_jobs %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>State</th>
+                        <th>Status</th>
+                        <th>Therapists Found</th>
+                        <th>Emails Found</th>
+                        <th>Started</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in recent_jobs %}
+                    <tr>
+                        <td>
+                            <strong>{{ job.state.title() }}</strong>
+                        </td>
+                        <td>
+                            {% if job.status == 'completed' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i> Completed
+                                </span>
+                            {% elif job.status == 'running' %}
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-spinner fa-spin"></i> Running
+                                </span>
+                            {% elif job.status == 'failed' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times"></i> Failed
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-clock"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ job.total_found or 0 }}</td>
+                        <td>{{ job.emails_found or 0 }}</td>
+                        <td>{{ job.start_time }}</td>
+                        <td>
+                            {% if job.end_time %}
+                                <span class="text-muted">
+                                    {% set duration = (job.end_time | strptime('%Y-%m-%d %H:%M:%S') - job.start_time | strptime('%Y-%m-%d %H:%M:%S')) %}
+                                    {{ duration.total_seconds() // 60 }}m {{ duration.total_seconds() % 60 }}s
+                                </span>
+                            {% elif job.status == 'running' %}
+                                <span class="text-primary">In progress...</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No extraction jobs yet. Start your first extraction!</p>
+            <a href="{{ url_for('extract_data') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Start Extraction
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Extract Data - Therapist Extraction System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-download text-primary"></i> Extract Therapist Data</h1>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> Extraction Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="extractionForm">
+                    <div class="mb-4">
+                        <label for="state" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Select State
+                        </label>
+                        <select class="form-select form-select-lg" id="state" name="state" required>
+                            <option value="">Choose a state...</option>
+                            <option value="wyoming">Wyoming</option>
+                            <option value="colorado">Colorado</option>
+                            <option value="utah">Utah</option>
+                            <option value="montana">Montana</option>
+                            <option value="idaho">Idaho</option>
+                            <option value="nevada">Nevada</option>
+                            <option value="arizona">Arizona</option>
+                            <option value="new-mexico">New Mexico</option>
+                            <option value="north-dakota">North Dakota</option>
+                            <option value="south-dakota">South Dakota</option>
+                            <option value="nebraska">Nebraska</option>
+                            <option value="kansas">Kansas</option>
+                            <option value="oklahoma">Oklahoma</option>
+                            <option value="texas">Texas</option>
+                            <option value="california">California</option>
+                            <option value="oregon">Oregon</option>
+                            <option value="washington">Washington</option>
+                            <option value="alaska">Alaska</option>
+                            <option value="hawaii">Hawaii</option>
+                            <option value="florida">Florida</option>
+                            <option value="georgia">Georgia</option>
+                            <option value="alabama">Alabama</option>
+                            <option value="mississippi">Mississippi</option>
+                            <option value="louisiana">Louisiana</option>
+                            <option value="arkansas">Arkansas</option>
+                            <option value="tennessee">Tennessee</option>
+                            <option value="kentucky">Kentucky</option>
+                            <option value="west-virginia">West Virginia</option>
+                            <option value="virginia">Virginia</option>
+                            <option value="north-carolina">North Carolina</option>
+                            <option value="south-carolina">South Carolina</option>
+                            <option value="maryland">Maryland</option>
+                            <option value="delaware">Delaware</option>
+                            <option value="new-jersey">New Jersey</option>
+                            <option value="new-york">New York</option>
+                            <option value="connecticut">Connecticut</option>
+                            <option value="rhode-island">Rhode Island</option>
+                            <option value="massachusetts">Massachusetts</option>
+                            <option value="vermont">Vermont</option>
+                            <option value="new-hampshire">New Hampshire</option>
+                            <option value="maine">Maine</option>
+                            <option value="pennsylvania">Pennsylvania</option>
+                            <option value="ohio">Ohio</option>
+                            <option value="michigan">Michigan</option>
+                            <option value="indiana">Indiana</option>
+                            <option value="illinois">Illinois</option>
+                            <option value="wisconsin">Wisconsin</option>
+                            <option value="minnesota">Minnesota</option>
+                            <option value="iowa">Iowa</option>
+                            <option value="missouri">Missouri</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-tachometer-alt"></i> Extraction Mode
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="mode" value="normal" id="normal" class="form-check-input" checked>
+                                        <label for="normal" class="form-check-label">
+                                            <h6 class="mt-2"><i class="fas fa-turtle"></i> Normal Mode</h6>
+                                            <p class="text-muted small">2-4 second delays<br>Thorough extraction<br>Respectful to servers</p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="mode" value="fast" id="fast" class="form-check-input">
+                                        <label for="fast" class="form-check-label">
+                                            <h6 class="mt-2"><i class="fas fa-rocket"></i> Ultra-Fast Mode</h6>
+                                            <p class="text-muted small">Parallel processing<br>5-10x faster<br>Higher server load</p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>What happens next:</strong>
+                        <ol class="mb-0 mt-2">
+                            <li>Extract all therapist profiles from Psychology Today</li>
+                            <li>Follow website links to find email addresses</li>
+                            <li>Store data in database for review</li>
+                            <li>Generate draft emails for therapists with email addresses</li>
+                            <li>Review and approve emails before sending</li>
+                        </ol>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play"></i> Start Extraction
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Progress Section -->
+                <div id="progressSection" class="mt-4" style="display: none;">
+                    <div class="alert alert-success">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <strong>Extraction in progress...</strong>
+                        <p class="mb-0 mt-2">This may take several minutes depending on the state size and mode selected.</p>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('extractionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const state = formData.get('state');
+    const mode = formData.get('mode');
+    
+    if (!state) {
+        showToast('Please select a state', 'danger');
+        return;
+    }
+    
+    // Show progress
+    document.getElementById('progressSection').style.display = 'block';
+    document.querySelector('button[type="submit"]').disabled = true;
+    
+    // Start extraction
+    fetch('/extract', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            checkJobStatus(data.job_id);
+        } else {
+            showToast('Failed to start extraction', 'danger');
+            document.getElementById('progressSection').style.display = 'none';
+            document.querySelector('button[type="submit"]').disabled = false;
+        }
+    })
+    .catch(error => {
+        showToast('Error starting extraction: ' + error.message, 'danger');
+        document.getElementById('progressSection').style.display = 'none';
+        document.querySelector('button[type="submit"]').disabled = false;
+    });
+});
+</script>
+{% endblock %}
