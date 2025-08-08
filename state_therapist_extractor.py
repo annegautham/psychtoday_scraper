@@ -863,27 +863,13 @@ def main():
         print("State name is required")
         return
     
-    # Speed options
-    print("\\nChoose extraction speed:")
-    print("1. Normal (2-4s delays, thorough)")
-    print("2. Ultra-Fast (parallel processing, 5-10x faster)")
-    
-    speed_choice = input("Enter choice (1-2): ").strip()
-    
-    if speed_choice == "2":
-        print("\\nLaunching Ultra-Fast Parallel Extractor...")
-        import subprocess
-        subprocess.run(["python", "fast_therapist_extractor.py"])
-        return
-    
-    # Normal mode (no fast_mode needed anymore)
-    print("\\nNormal mode - thorough extraction")
+    print(f"\\nStarting thorough extraction for {state_name}...")
     
     # Create extractor instance
     extractor = StateTherapistExtractor()
     
     # Extract all therapist data
-    print(f"\\nStarting extraction for {state_name}...")
+    print(f"\\nExtracting therapists from {state_name}...")
     therapists_data = extractor.extract_state_therapists(state_name)
     
     if not therapists_data:
