@@ -1,0 +1,72 @@
+# Core web scraping dependencies
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+
+# Data processing
+pandas>=1.5.0
+
+# Selenium for browser automation
+selenium>=4.0.0
+
+# Email validation
+email-validator>=1.3.0
+
+# HTTP session management
+requests-html>=0.10.0
+
+# Rate limiting and delays
+ratelimit>=2.2.0
+
+# Email validation
+email-validator>=1.3.0
+
+# HTML parsing alternatives
+html5lib>=1.1
+pyquery>=1.4.0
+
+# For handling different encodings
+chardet>=5.0.0
+
+# JSON handling (built-in but good to specify)
+# json - built into Python
+
+# CSV handling (built-in)
+# csv - built into Python
+
+# Logging (built-in)
+# logging - built into Python
+
+# Regular expressions (built-in)
+# re - built into Python
+
+# URL parsing (built-in)
+# urllib.parse - built into Python
+
+# Time and random (built-in)
+# time, random, datetime - built into Python
+
+# SSL for secure email (built-in)
+# ssl - built into Python
+
+# Data classes (built-in in Python 3.7+)
+# dataclasses - built into Python
+
+# Type hints (built-in in Python 3.5+)
+# typing - built into Python
+
+# Optional: For more advanced email features
+email-mime-multipart>=0.1.0
+
+# Optional: For proxy support if needed
+requests[socks]>=2.28.0
+
+# Optional: For async scraping (if implementing async version)
+aiohttp>=3.8.0
+asyncio>=3.4.3
+
+# Optional: For Hunter.io API integration
+hunter>=2.2.0
+
+# Optional: For more robust HTML parsing
+selectolax>=0.3.0

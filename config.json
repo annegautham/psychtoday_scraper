@@ -1,0 +1,51 @@
+{
+  "email": {
+    "smtp_server": "mail.privateemail.com",
+    "smtp_port": 465,
+    "address": "outreach@koamigo.com",
+    "password": "Koamigo@2025"
+  },
+  "scraping": {
+    "states": ["WY"],
+    "cities": {
+      "CA": ["los-angeles", "san-francisco", "san-diego"],
+      "NY": ["new-york", "buffalo", "rochester"],
+      "TX": ["houston", "dallas", "austin"],
+      "FL": ["miami", "tampa", "orlando"],
+      "WA": ["seattle", "spokane"],
+      "MA": ["boston", "cambridge"],
+      "IL": ["chicago"],
+      "PA": ["philadelphia", "pittsburgh"]
+    },
+    "max_therapists_per_state": 100,
+    "delay_between_emails": [60, 180],
+    "max_emails_per_day": 50,
+    "delay_between_requests": [2, 5]
+  },
+  "university_caps_urls": [
+    "https://caps.northwestern.edu/staff/",
+    "https://vaden.stanford.edu/caps-and-bridge/caps/staff",
+    "https://counseling.uchicago.edu/about/staff/",
+    "https://counseling.berkeley.edu/staff/",
+    "https://studenthealth.ucsd.edu/services/mental-health/caps/staff.html",
+    "https://counseling.ucla.edu/staff",
+    "https://counseling.usc.edu/staff",
+    "https://counseling.columbia.edu/staff",
+    "https://counseling.nyu.edu/staff",
+    "https://counseling.cornell.edu/staff",
+    "https://counseling.harvard.edu/staff",
+    "https://counseling.mit.edu/staff",
+    "https://counseling.yale.edu/staff",
+    "https://counseling.princeton.edu/staff"
+  ],
+  "hunter_io": {
+    "api_key": "YOUR_HUNTER_IO_API_KEY_HERE",
+    "enabled": false
+  },
+  "anti_spam_measures": {
+    "randomize_send_times": true,
+    "vary_email_content": true,
+    "respect_robots_txt": true,
+    "max_requests_per_minute": 10
+  }
+}
