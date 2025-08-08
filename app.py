@@ -11,7 +11,7 @@ import pandas as pd
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this'
 
-# Database setup
+# Initialize database when the module is imported
 def init_db():
     conn = sqlite3.connect('therapist_data.db')
     cursor = conn.cursor()
@@ -381,6 +381,9 @@ def job_status(job_id):
         return jsonify({'error': 'Job not found'}), 404
     
     return jsonify(dict(job))
+
+# Initialize database for production
+init_db()
 
 if __name__ == '__main__':
     init_db()
