@@ -1,116 +1,149 @@
-# Psychology Today Scraper
+# Psychology Today Therapist Scraper
 
-A comprehensive Python system to extract therapist information from Psychology Today and manage email outreach campaigns.
+A comprehensive web scraping system that extracts therapist information from Psychology Today by state and enables targeted email outreach campaigns.
 
-## Features
+## 🚀 Features
 
-- **Web-based Dashboard**: Modern Flask interface for managing extractions and emails
-- **Smart Rate Limiting**: Respectful scraping with user-agent rotation and exponential backoff
-- **Two Extraction Modes**: Normal (thorough) and Ultra-Fast (parallel processing)
-- **Email Management**: Review, edit, and approve emails before sending
-- **Database Storage**: SQLite database for persistent data storage
-- **Background Processing**: Non-blocking extraction jobs
+- **State-based extraction** - Extract all therapists from any US state
+- **Email discovery** - Automatically finds personal email addresses from therapist websites
+- **Web dashboard** - Complete Flask-based interface for management
+- **Email campaigns** - Automated personalized email generation and sending
+- **Real-time logging** - Comprehensive activity tracking and monitoring
+- **Smart rate limiting** - Respectful scraping with anti-detection measures
+- **VPN compatible** - Works with VPN services to bypass IP restrictions
 
-## Quick Start
+## 🛠️ Quick Start
 
-1. **Set up virtual environment:**
-   ```bash
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1  # Windows
-   # or: source venv/bin/activate  # Linux/Mac
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure email settings:**
-   - Edit `config.json` with your email settings
-
-4. **Start the web application:**
-   ```bash
-   python app.py
-   ```
-
-5. **Open your browser:**
-   ```
-   http://localhost:5000
-   ```
-
-## Web Interface
-
-### Dashboard
-- View extraction statistics
-- Monitor recent jobs
-- Quick access to all features
-
-### Extract Data
-- Select any US state
-- Choose extraction speed (Normal vs Ultra-Fast)
-- Monitor progress in real-time
-
-### Email Management
-- Review all extracted emails
-- Edit subject lines and content
-- Approve emails individually
-- Send emails in batches
-
-### Therapist Database
-- Browse all extracted therapist data
-- Search and filter results
-- Export to CSV
-
-## Command Line Usage
-
-You can still use the original command-line scripts:
-
+### 1. Setup
 ```bash
-# Main extraction system
-python state_therapist_extractor.py
-
-# Ultra-fast parallel version  
-python fast_therapist_extractor.py
+pip install -r requirements.txt
+cp .env.template .env  # Configure your email settings
 ```
 
-## Files
+### 2. Start the Application
+```bash
+python app.py
+```
 
-- **`app.py`** - Flask web application with dashboard
-- **`state_therapist_extractor.py`** - Main extraction system with smart rate limiting
-- **`fast_therapist_extractor.py`** - Ultra-fast parallel processing version
-- **`therapist_outreach.py`** - Base classes for therapist info and email generation
-- **`config.json`** - Email configuration settings
-- **`templates/`** - HTML templates for web interface
+### 3. Access Dashboard
+Open http://localhost:5000 in your browser
 
-## Database
+### 4. Extract Therapists
+- Use the web interface "Extract Data" page
+- Or run: `python run_extraction.py`
 
-The system uses SQLite to store:
-- **Therapists**: All extracted therapist information
-- **Email Queue**: Draft, approved, and sent emails
-- **Extraction Jobs**: Status and progress of extraction tasks
+### 5. Send Emails
+- Review and approve emails in the "Email Queue"
+- Or run: `python run_emails.py`
 
-## Email Workflow
+## 📊 Dashboard Features
 
-1. **Extract**: Run extraction job for any state
-2. **Review**: Browse generated draft emails  
-3. **Edit**: Modify subject lines and content as needed
-4. **Approve**: Mark emails ready for sending
-5. **Send**: Batch send all approved emails
+- **📈 Dashboard** - Overview statistics and recent activity
+- **🔍 Extract Data** - Start new therapist extraction jobs
+- **👥 Therapists** - Browse extracted therapist database
+- **📧 Email Queue** - Manage and send email campaigns
+- **📝 System Logs** - Real-time activity monitoring
 
-All emails are sent to your configured demo address for safety.
+## 🔧 Configuration
 
-## Rate Limiting Features
+### Email Setup
+Edit `config.json`:
+```json
+{
+  "email": {
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "email": "your-email@gmail.com",
+    "password": "your-app-password"
+  }
+}
+```
 
-- 8 rotating user agents
-- Smart delay system (2s → 20s → 40s → 80s)
-- Session rotation every 20 requests  
-- 403/429 error detection and recovery
-- Exponential backoff on failures
+### Environment Variables
+Create `.env` file:
+```
+FLASK_ENV=production
+SECRET_KEY=your-secret-key
+```
 
-## Safety Features
+## 🚀 Deployment
 
-- All actual emails redirected to demo address
-- Manual approval required before sending
-- Comprehensive error handling and logging
-- Respectful of Psychology Today's servers
+### Option 1: Fly.io
+```bash
+fly deploy
+```
 
+### Option 2: Render
+```bash
+# Push to GitHub and connect to Render
+```
+
+### Option 3: Docker
+```bash
+docker build -t therapist-scraper .
+docker run -p 5000:5000 therapist-scraper
+```
+
+## 📋 API Endpoints
+
+- `GET /` - Dashboard
+- `POST /extract` - Start extraction job
+- `GET /job_status/<id>` - Check job status
+- `GET /therapists` - View therapists
+- `GET /emails` - Email queue management
+- `GET /logs` - System logs
+- `GET /api/logs` - Logs API
+
+## ⚠️ Important Notes
+
+- **VPN Required**: Psychology Today blocks many IPs. Use a VPN service like Hide.me, NordVPN, or ExpressVPN
+- **Rate Limiting**: The system includes smart delays to respect website resources
+- **Email Compliance**: All emails are sent to your configured address for compliance
+- **Legal**: Review Psychology Today's Terms of Service before use
+
+## 🔍 Troubleshooting
+
+### "403 Forbidden" Errors
+- Your IP is blocked by Psychology Today
+- Solution: Connect to a VPN and try again
+
+### No Therapists Found
+- Check your VPN connection
+- Verify the state name is correct
+- Check system logs for detailed error messages
+
+### Email Sending Issues
+- Verify email configuration in `config.json`
+- Use app-specific passwords for Gmail
+- Check logs for SMTP errors
+
+## 📁 Project Structure
+
+```
+psychtoday_scraper/
+├── app.py                    # Main Flask application
+├── state_therapist_extractor.py  # Core scraping logic
+├── therapist_outreach.py     # Email functionality
+├── run_extraction.py         # Standalone extraction script
+├── run_emails.py            # Standalone email script
+├── templates/               # HTML templates
+├── config.json             # Email configuration
+├── requirements.txt        # Python dependencies
+└── README.md              # This file
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is for educational and research purposes. Please respect website terms of service and applicable laws.
+
+---
+
+**Built with ❤️ for mental health accessibility**

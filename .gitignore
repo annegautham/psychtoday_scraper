@@ -18,6 +18,23 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+
+# Runtime files
+therapist_data.db
+therapist_outreach.log
+*.csv
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 .installed.cfg
 *.egg
 MANIFEST

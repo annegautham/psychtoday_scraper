@@ -4,12 +4,23 @@ import json
 from datetime import datetime
 import threading
 import os
+import logging
 from state_therapist_extractor import StateTherapistExtractor
 from therapist_outreach import EmailSender, EmailTemplateGenerator, TherapistInfo
 import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this'
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('therapist_outreach.log'),
+        logging.StreamHandler()
+    ]
+)
 
 # Initialize database when the module is imported
 def init_db():
@@ -113,30 +124,57 @@ def save_therapists_to_db(therapists_data, state, job_id):
 # Background extraction task
 def run_extraction_task(state, job_id, mode='normal'):
     try:
+        logging.info(f"🎯 Starting extraction job {job_id} for {state}")
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('UPDATE extraction_jobs SET status = "running" WHERE id = ?', (job_id,))
         conn.commit()
         conn.close()
         
+        logging.info(f"📋 Initializing extractor for {state}")
+        
         # Run the extraction
         extractor = StateTherapistExtractor()
         therapists_data = extractor.extract_state_therapists(state)
         
+        logging.info(f"✅ Extraction complete! Found {len(therapists_data)} therapists")
+        
         # Save to database
         emails_found = save_therapists_to_db(therapists_data, state, job_id)
+        
+        logging.info(f"💾 Saved {len(therapists_data)} therapists to database")
+        logging.info(f"📧 Found {emails_found} therapists with emails")
         
         # Generate draft emails for therapists with email addresses
         generate_draft_emails(state)
         
+        logging.info(f"📝 Generated draft emails for {state}")
+        
+        # Update job status
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE extraction_jobs 
+            SET status = "completed", total_found = ?, emails_found = ?, end_time = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (len(therapists_data), emails_found, job_id))
+        conn.commit()
+        conn.close()
+        
+        logging.info(f"🎉 Extraction job {job_id} completed successfully!")
+        
     except Exception as e:
+        error_msg = str(e)
+        logging.error(f"💥 Extraction job {job_id} failed: {error_msg}")
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
             UPDATE extraction_jobs 
             SET status = "failed", error_message = ?, end_time = CURRENT_TIMESTAMP
             WHERE id = ?
-        ''', (str(e), job_id))
+        ''', (error_msg, job_id))
         conn.commit()
         conn.close()
 
@@ -311,11 +349,13 @@ def send_emails():
     
     # Get approved emails
     approved_emails = conn.execute('''
-        SELECT eq.*, t.email as therapist_email
+        SELECT eq.*, t.email as therapist_email, t.name as therapist_name
         FROM email_queue eq
         JOIN therapists t ON eq.therapist_id = t.id
         WHERE eq.status = 'approved'
     ''').fetchall()
+    
+    logging.info(f"📧 Starting email campaign for {len(approved_emails)} approved emails")
     
     # Load email config
     try:
@@ -333,12 +373,17 @@ def send_emails():
             email=email_config.get('email', ''),
             password=email_config.get('password', '')
         )
+        logging.info("✅ Email sender configured")
     else:
+        logging.error("❌ Email not configured")
         return jsonify({'success': False, 'message': 'Email not configured'})
     
     sent_count = 0
     
     for email in approved_emails:
+        therapist_name = email['therapist_name']
+        logging.info(f"📤 Sending email to {therapist_name}")
+        
         try:
             success = email_sender.send_email(
                 email['therapist_email'], 
@@ -385,6 +430,26 @@ def job_status(job_id):
         return jsonify({'error': 'Job not found'}), 404
     
     return jsonify(dict(job))
+
+@app.route('/logs')
+def view_logs():
+    """View recent log entries"""
+    try:
+        with open('therapist_outreach.log', 'r') as f:
+            logs = f.readlines()[-100:]  # Last 100 lines
+        return render_template('logs.html', logs=logs)
+    except FileNotFoundError:
+        return render_template('logs.html', logs=['No log file found'])
+
+@app.route('/api/logs')
+def api_logs():
+    """API endpoint for logs"""
+    try:
+        with open('therapist_outreach.log', 'r') as f:
+            logs = f.readlines()[-50:]  # Last 50 lines
+        return jsonify({'logs': [log.strip() for log in logs]})
+    except FileNotFoundError:
+        return jsonify({'logs': ['No log file found']})
 
 # Initialize database for production
 init_db()
